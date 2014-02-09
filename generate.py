@@ -3,46 +3,25 @@
 # Imports
 
 import argparse
-import codecs
-import string
-import time
-import os
+import os.path
 
 # Generators
-import mdgenerator
+import mdgenerate
+import gzcompress
 
 # Configuration
 
 enabled_generators = [
-	mdgenerator
+	mdgenerate
+	,gzcompress
 ]
 
 configuration = {
 	# The base URL for the website to be generated.
 	"baseURL":      "http://floaternet.com/"
-	# Static files to be compressed by the gzip-compression routine.
-	,"staticFiles": (".css", ".js", ".htm", ".html")
 }
 
 # Functions
-
-def compressFiles(files):
-	"""
-	Compress the listed files, if they were updated since the last compression.
-
-	Arguments:
-	files - an iterable with file names to process.
-	"""
-	for file in files:
-		print("Compressing: " + file)
-		os.system("gzip --keep --best --force " + file)
-
-def findCompressibleFiles(startPath):
-	compressibleFiles = []
-	for file in findFiles(startPath, configuration["staticFiles"]):
-		if (not os.path.isfile(file + ".gz") or isUpdated(file, file + ".gz")):
-			compressibleFiles.append(file)
-	return compressibleFiles
 
 def findFiles(startPath, types=None):
 	"""
@@ -66,22 +45,8 @@ def findFiles(startPath, types=None):
 				files.append(nodePath)
 	return files
 
-def isUpdated(checkPath, againstPath):
-	"""
-	Check if one file is newer compared to another.
-
-	Arguments:
-	checkPath - if True, this file is newer (string)
-	againstPath - if False, this file is newer (string)
-
-	Returns True or False
-	"""
-	if os.path.getmtime(checkPath) > os.path.getmtime(againstPath):
-		return True
-	else:
-		return False
-
 # Register the command line options.
+
 parser = argparse.ArgumentParser(description="Generate a static website from markdown files.")
 parser.add_argument("--force", dest="force_generate", action="store_true",
                     help="force generation of site content.")
@@ -91,36 +56,30 @@ for generator in enabled_generators:
 		parser.add_argument(arg["name"], dest=arg["dest"], action=arg["method"], help=arg["help"], default=arg["default"])
 args = parser.parse_args()
 
-# Find generators for file extensions.
-generator_mappings = {}
+# Run the generators.
 
 for generator in enabled_generators:
+	documents = findFiles(args.chosenPath)
+	generator_mappings = {}
 	for extension in generator.extensions:
 		generator_mappings[extension] = generator
 
-# Find documents
-documents = findFiles(args.chosenPath)
+	# Preprocess
+	for doc in documents[:]:
+		try:
+			keep = generator_mappings[os.path.splitext(doc)[1]].preprocess(doc, configuration, args)
+		except KeyError:
+			documents.remove(doc)
+			continue
+		if not keep:
+			documents.remove(doc)
+	
+	# Main Processing
+	for doc in documents[:]:
+		keep = generator_mappings[os.path.splitext(doc)[1]].process(doc, configuration, args)
+		if not keep:
+			documents.remove(doc) 
 
-# Preprocess
-for doc in documents[:]:
-	try:
-		keep = generator_mappings[os.path.splitext(doc)[1]].preprocess(doc, configuration, args)
-	except KeyError:
-		documents.remove(doc)
-		continue
-	if not keep:
-		documents.remove(doc)
-
-# Main Processing
-for doc in documents[:]:
-	keep = generator_mappings[os.path.splitext(doc)[1]].process(doc, configuration, args)
-	if not keep:
-		documents.remove(doc) 
-
-# Postprocessing
-for doc in documents:
-	generator_mappings[os.path.splitext(doc)[1]].preprocess(doc, configuration, args)
-
-# compression
-compressibleFiles = findCompressibleFiles(args.chosenPath)
-compressFiles(compressibleFiles)
+	# Postprocessing
+	for doc in documents:
+		generator_mappings[os.path.splitext(doc)[1]].preprocess(doc, configuration, args)
