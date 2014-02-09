@@ -1,6 +1,6 @@
 import os
 
-# Code Start
+# Defenitions
 
 arguments = []
 
@@ -10,6 +10,8 @@ extensions = [
 	,".html"
 	,".js"
 ]
+
+# Code Start
 
 def preprocess(doc, config, args):
 	if args.force_generate:
