@@ -1,4 +1,5 @@
 import os
+import gzip
 
 # Defenitions
 
@@ -20,12 +21,17 @@ def preprocess(doc, config, args):
 
 def process(doc, config, args):
 	print("Compressing: " + doc)
-	os.system("gzip --keep --best --force " + doc)
+	gzip_file(doc)
 
 def postprocess(doc, config, args):
 	pass
 
 # Utility Functions
+
+def gzip_file(doc):
+	with open(doc, "rb") as in_file:
+		with gzip.open(doc + ".gz", "wb") as out_file:
+			out_file.writelines(in_file)
 
 def is_updated(checkPath, againstPath):
 	"""
