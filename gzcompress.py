@@ -37,7 +37,4 @@ def is_updated(checkPath, againstPath):
 
 	Returns True or False
 	"""
-	if os.path.getmtime(checkPath) > os.path.getmtime(againstPath):
-		return True
-	else:
-		return False
+	return os.path.getmtime(checkPath) > os.path.getmtime(againstPath)
