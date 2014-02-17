@@ -26,6 +26,9 @@ def process(doc, config, args):
 def postprocess(doc, config, args):
 	pass
 
+def finalise(config, args):
+	pass
+
 # Utility Functions
 
 def gzip_file(doc):

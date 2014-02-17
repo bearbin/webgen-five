@@ -8,12 +8,14 @@ import os.path
 # Generators
 import mdgenerate
 import gzcompress
+import sitemapgenerate
 
 # Configuration
 
 enabled_generators = [
 	mdgenerate
 	,gzcompress
+	,sitemapgenerate
 ]
 
 configuration = {
@@ -83,3 +85,6 @@ for generator in enabled_generators:
 	# Postprocessing
 	for doc in documents:
 		generator_mappings[os.path.splitext(doc)[1]].preprocess(doc, configuration, args)
+
+	# Finalisation.
+	generator.finalise(configuration, args)
