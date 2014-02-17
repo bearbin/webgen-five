@@ -34,6 +34,7 @@ def process(doc, config, args):
 	_sitemap.append("    <lastmod>" + formatted_time + "</lastmod>")
 	_sitemap.append("    <changefreq>" + _change_frequency + "</changefreq>")
 	_sitemap.append("  </url>")
+	return True
 
 def postprocess(doc, config, args):
 	pass
