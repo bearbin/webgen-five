@@ -14,8 +14,8 @@ import sitemapgenerate
 
 enabled_generators = [
 	mdgenerate
-	,gzcompress
 	,sitemapgenerate
+	,gzcompress
 ]
 
 configuration = {
