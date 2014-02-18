@@ -10,6 +10,8 @@ extensions = [
 	,".htm"
 	,".html"
 	,".js"
+	,".xml"
+	,".xhtml"
 ]
 
 # Code Start
