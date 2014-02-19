@@ -59,6 +59,7 @@ def process(doc, config, args, meta):
 	canonical = get_canonical(doc, config, args)
 	description = meta["description"]
 	update_time = time.strftime(timeFormula, time.localtime(os.path.getmtime(doc)))
+	# Convert the input markdown into HTML ready for the middle of the template.
 	with codecs.open(doc, mode="r", encoding="utf-8") as markdown_input:
 		markdown_generated = markdown.markdown(markdown_input.read())
 	html_output = template.safe_substitute(title = title,
@@ -67,6 +68,7 @@ def process(doc, config, args, meta):
 	                                  description = description,
 	                                  update_time = update_time,
 	                                  markdown_generated = markdown_generated)
+	# Write the generated HTML.
 	with codecs.open(doc[:-3] + ".htm", mode="w", encoding="utf-8") as f:
 		f.write(html_output)
 	# Add the page to its relevant tag pages.
@@ -78,9 +80,53 @@ def postprocess(doc, config, args, meta):
 	pass
 
 def finalise(config, args):
-	pass
+	# First, generate the tag pages from the tags.
+	for tag_page in _tag_pages:
+		generate_tag_page(tag_page)
+	# Then, generate the main index page.
+	generate_index()
 
 # Utility Functions
+
+def generate_document(path, config, args, meta, content):
+	"""
+	Generate a document with the information from the meta file, and content to go in the middle.
+	"""
+	# Open the template file.
+	with codecs.open(args.template_path, mode="r", encoding="utf-8") as template_file:
+		template = string.Template(template_file.read())
+	title = meta["title"]
+	if meta["plain_title"]:
+		head_title = title
+	else:
+		head_title = title + " &middot; " + website_name
+	canonical = get_canonical(doc, config, args)
+	description = meta["description"]
+	# Generate the timestamp.
+	if meta["supress_timestamp"]:
+		update_time = ""
+	else:
+		update_time = time.strftime(timeFormula, time.localtime(os.path.getmtime(doc)))
+	html_output = template.safe_substitute(
+		title = title,
+	        head_title = head_title,
+	        canonical = canonical,
+	        description = description,
+	        update_time = update_time,
+	        content = content
+	)
+	# Write the generated HTML.
+	with codecs.open(doc[:-3] + ".htm", mode="w", encoding="utf-8") as f:
+		f.write(html_output)
+
+def get_meta_info(doc):
+	"""
+	Get the meta information relating to a document.
+	
+	Fetches from the document.meta file.
+	"""
+	with codecs.open(doc + ".meta", encoding="UTF-8") as meta_file:
+		return json.loads(meta_file.read())
 
 def get_subtag(tag):
 	try:
