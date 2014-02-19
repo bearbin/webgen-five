@@ -76,10 +76,15 @@ for generator in enabled_generators:
 	for extension in generator.extensions:
 		generator_mappings[extension] = generator
 
+	# Initialisation
+	generator.config = configuration
+	generator.args = args
+	generator.initialise()
+
 	# Preprocess
 	for doc in documents[:]:
 		try:
-			mapping = generator_mappings[os.path.splitext(doc)[1]]preprocess(doc, configuration, args)
+			mapping = generator_mappings[os.path.splitext(doc)[1]]
 		except KeyError:
 			documents.remove(doc)
 			continue
@@ -87,7 +92,7 @@ for generator in enabled_generators:
 			meta = get_meta(doc)
 		else:
 			meta = None
-		keep = mapping.preprocess(doc, configuration, args, meta)
+		keep = mapping.preprocess(doc, meta)
 		if not keep:
 			documents.remove(doc)
 	
@@ -98,7 +103,7 @@ for generator in enabled_generators:
 			meta = get_meta(doc)
 		else:
 			meta = None
-		keep = mapping.process(doc, configuration, args, meta)
+		keep = mapping.process(doc, meta)
 		if not keep:
 			documents.remove(doc) 
 
@@ -109,7 +114,7 @@ for generator in enabled_generators:
 			meta = get_meta(doc)
 		else:
 			meta = None
-		mapping.preprocess(doc, configuration, args, meta)
+		mapping.preprocess(doc, meta)
 
 	# Finalisation.
 	generator.finalise(configuration, args)
