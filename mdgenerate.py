@@ -71,7 +71,7 @@ def process(doc, config, args, meta):
 		f.write(html_output)
 	# Add the page to its relevant tag pages.
 	for tag in meta["tags"]:
-		_tag_pages[tag].append({"level2": get_level2_tag(tag), "canonical": canonical, "title": title})
+		_tag_pages[tag].append({"subtag": get_subtag(tag), "canonical": canonical, "title": title})
 	return True
 
 def postprocess(doc, config, args, meta):
@@ -82,7 +82,7 @@ def finalise(config, args):
 
 # Utility Functions
 
-def get_level2_tag(tag):
+def get_subtag(tag):
 	try:
 		return tag.split("/", 1)[1]
 	except IndexError:
