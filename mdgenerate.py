@@ -31,6 +31,8 @@ extensions = [
 	".markdown"
 ]
 
+requires_meta = True
+
 def preprocess(doc, config, args):
 	if args.force_generate == True:
 		return True
