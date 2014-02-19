@@ -49,7 +49,12 @@ def find_files(start_path, types=None):
 	return files
 
 def get_meta(doc):
-	with codecs.open(os.path.splitext(doc) + ".meta", encoding="UTF-8") as meta_file:
+	"""
+	Get the meta information relating to a document.
+	
+	Fetches from the document.meta file.
+	"""
+	with codecs.open(os.path.splitext(doc)[0] + ".meta", encoding="UTF-8") as meta_file:
 		return json.loads(meta_file.read())
 
 # Register the command line options.
