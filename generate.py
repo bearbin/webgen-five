@@ -4,6 +4,8 @@
 
 import argparse
 import os.path
+import codecs
+import json
 
 # Generators
 import mdgenerate
@@ -25,7 +27,7 @@ configuration = {
 
 # Functions
 
-def findFiles(startPath, types=None):
+def find_files(start_path, types=None):
 	"""
 	Search for files of the type recursively from, starting from `startPath`.
 
@@ -36,16 +38,19 @@ def findFiles(startPath, types=None):
 	Returns a list of relative paths to matched files. (empty list if none found)
 	"""
 	files = []
-	for node in os.listdir(startPath):
-		nodePath = os.path.join(startPath, node)
-		if os.path.isdir(nodePath):
-			files = files + findFiles(nodePath, types)
-		else:
-			if types == None:
-				files.append(nodePath)
-			elif node.endswith(types):
-				files.append(nodePath)
+	for node in os.listdir(start_path):
+		node_path = os.path.join(start_path, node)
+		if os.path.isdir(node_path):
+			files = files + find_files(node_path, types)
+		elif types == None:
+			files.append(node_path)
+		elif node.endswith(types):
+			files.append(node_path)
 	return files
+
+def get_meta(doc):
+	with codecs.open(os.path.splitext(doc) + ".meta", encoding="UTF-8") as meta_file:
+		return json.loads(meta_file.read())
 
 # Register the command line options.
 
@@ -61,7 +66,7 @@ args = parser.parse_args()
 # Run the generators.
 
 for generator in enabled_generators:
-	documents = findFiles(args.chosenPath)
+	documents = find_files(args.chosenPath)
 	generator_mappings = {}
 	for extension in generator.extensions:
 		generator_mappings[extension] = generator
@@ -69,22 +74,37 @@ for generator in enabled_generators:
 	# Preprocess
 	for doc in documents[:]:
 		try:
-			keep = generator_mappings[os.path.splitext(doc)[1]].preprocess(doc, configuration, args)
+			mapping = generator_mappings[os.path.splitext(doc)[1]]preprocess(doc, configuration, args)
 		except KeyError:
 			documents.remove(doc)
 			continue
+		if mapping.requires_meta:
+			meta = get_meta(doc)
+		else:
+			meta = None
+		keep = mapping.preprocess(doc, configuration, args, meta)
 		if not keep:
 			documents.remove(doc)
 	
 	# Main Processing
 	for doc in documents[:]:
-		keep = generator_mappings[os.path.splitext(doc)[1]].process(doc, configuration, args)
+		mapping = generator_mappings[os.path.splitext(doc)[1]]
+		if mapping.requires_meta:
+			meta = get_meta(doc)
+		else:
+			meta = None
+		keep = mapping.process(doc, configuration, args, meta)
 		if not keep:
 			documents.remove(doc) 
 
 	# Postprocessing
 	for doc in documents:
-		generator_mappings[os.path.splitext(doc)[1]].preprocess(doc, configuration, args)
+		mapping = generator_mappings[os.path.splitext(doc)[1]]
+		if mapping.requires_meta:
+			meta = get_meta(doc)
+		else:
+			meta = None
+		mapping.preprocess(doc, configuration, args, meta)
 
 	# Finalisation.
 	generator.finalise(configuration, args)
