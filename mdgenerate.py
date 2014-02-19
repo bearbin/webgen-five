@@ -52,7 +52,10 @@ def process(doc, config, args, meta):
 	with codecs.open(args.template_path, mode="r", encoding="utf-8") as template_file:
 		template = string.Template(template_file.read())
 	title = meta["title"]
-	head_title = format_head_title(title)
+	if meta["plain_title"]:
+		head_title = title
+	else:
+		head_title = title + " &middot; " + website_name
 	canonical = get_canonical(doc, config, args)
 	description = meta["description"]
 	update_time = time.strftime(timeFormula, time.localtime(os.path.getmtime(doc)))
@@ -86,12 +89,6 @@ def get_canonical(doc, config, args):
 	if relative_path.endswith("//"):
 		relative_path = relative_path[:-1]
 	return config["baseURL"] + relative_path
-
-def format_head_title(original_title):
-	if original_title != website_name:
-		return original_title + " &middot; " + website_name
-	else:
-		return original_title
 
 def is_updated(checkPath, againstPath):
 	"""
