@@ -1,3 +1,4 @@
+import collections.defaultdict
 import markdown
 import os.path
 import codecs
@@ -31,11 +32,7 @@ requires_meta = True
 # Setup
 
 # Tag Pages List
-_tags = {}
-
-# Template File
-with codecs.open(args.template_path, mode="r", encoding="utf-8") as templateFile:
-	template = string.Template(templateFile.read())
+_tag_pages = collections.defaultdict(list)
 
 # Code Start
 
@@ -51,19 +48,27 @@ def preprocess(doc, config, args, meta):
 
 def process(doc, config, args, meta):
 	print("Converting " + doc + " to HTML.")
+	# Open the template file.
+	with codecs.open(args.template_path, mode="r", encoding="utf-8") as template_file:
+		template = string.Template(template_file.read())
 	title = meta["title"]
 	head_title = format_head_title(title)
 	canonical = get_canonical(doc, config, args)
+	description = meta["description"]
 	update_time = time.strftime(timeFormula, time.localtime(os.path.getmtime(doc)))
 	with codecs.open(doc, mode="r", encoding="utf-8") as markdown_input:
 		markdown_generated = markdown.markdown(markdown_input.read())
-	html_output = template.substitute(title = title,
+	html_output = template.safe_substitute(title = title,
 	                                  head_title = head_title,
 	                                  canonical = canonical,
+	                                  description = description,
 	                                  update_time = update_time,
 	                                  markdown_generated = markdown_generated)
 	with codecs.open(doc[:-3] + ".htm", mode="w", encoding="utf-8") as f:
 		f.write(html_output)
+	# Add the page to its relevant tag pages.
+	for tag in meta["tags"]:
+		_tag_pages[tag].append({"canonical": canonical, "title": title})
 	return True
 
 def postprocess(doc, config, args, meta):
