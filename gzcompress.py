@@ -18,16 +18,16 @@ requires_meta = False
 
 # Code Start
 
-def preprocess(doc, config, args):
+def preprocess(doc, config, args, meta):
 	if args.force_generate:
 		return True
 	return (not os.path.isfile(doc + ".gz") or is_updated(doc, doc + ".gz"))
 
-def process(doc, config, args):
+def process(doc, config, args, meta):
 	print("Compressing: " + doc)
 	gzip_file(doc)
 
-def postprocess(doc, config, args):
+def postprocess(doc, config, args, meta):
 	pass
 
 def finalise(config, args):
