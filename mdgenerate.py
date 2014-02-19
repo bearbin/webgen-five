@@ -8,10 +8,8 @@ import time
 website_name = "The Floaternet"
 timeFormula = "%d %B %Y"
 
-# Cache Setup
-_cache = {
-	"title": {},
-}
+# Tag Pages Setup
+_tags = {}
 
 # Code Start
 
@@ -36,9 +34,12 @@ requires_meta = True
 def preprocess(doc, config, args, meta):
 	if args.force_generate == True:
 		return True
-	if (not os.path.isfile(os.path.splitext(doc)[0] + ".htm")) or is_updated(args.template_path, os.path.splitext(doc)[0] + ".htm"):
+	output_path = os.path.splitext(doc)[0] + ".htm"
+	if is_updated(os.path.splitext(doc)[0] + ".meta", output_path):
 		return True
-	return (not os.path.isfile(os.path.splitext(doc)[0] + ".htm")) or is_updated(doc, os.path.splitext(doc)[0] + ".htm")
+	if (not os.path.isfile(output_path)) or is_updated(args.template_path, output_path):
+		return True
+	return is_updated(doc, output_path)
 
 def process(doc, config, args, meta):
 	print("Converting " + doc + " to HTML.")
