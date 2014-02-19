@@ -33,14 +33,14 @@ extensions = [
 
 requires_meta = True
 
-def preprocess(doc, config, args):
+def preprocess(doc, config, args, meta):
 	if args.force_generate == True:
 		return True
 	if (not os.path.isfile(os.path.splitext(doc)[0] + ".htm")) or is_updated(args.template_path, os.path.splitext(doc)[0] + ".htm"):
 		return True
 	return (not os.path.isfile(os.path.splitext(doc)[0] + ".htm")) or is_updated(doc, os.path.splitext(doc)[0] + ".htm")
 
-def process(doc, config, args):
+def process(doc, config, args, meta):
 	print("Converting " + doc + " to HTML.")
 	with codecs.open(args.template_path, mode="r", encoding="utf-8") as templateFile:
 		template = string.Template(templateFile.read())
@@ -61,7 +61,7 @@ def process(doc, config, args):
 		f.write(html_output)
 	return True
 
-def postprocess(doc, config, args):
+def postprocess(doc, config, args, meta):
 	pass
 
 def finalise(config, args):
