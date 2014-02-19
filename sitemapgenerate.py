@@ -21,10 +21,10 @@ _sitemap = [
 	,"<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">"
 ]
 
-def preprocess(doc, config, args):
+def preprocess(doc, config, args, meta):
 	return True
 
-def process(doc, config, args):
+def process(doc, config, args, meta):
 	# Get the canonical URL for the file.
 	canonical_url = get_canonical(doc, config, args)
 	# Get file modification time.
@@ -38,7 +38,7 @@ def process(doc, config, args):
 	_sitemap.append("  </url>")
 	return True
 
-def postprocess(doc, config, args):
+def postprocess(doc, config, args, meta):
 	pass
 
 def finalise(config, args):
