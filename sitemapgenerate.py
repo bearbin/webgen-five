@@ -13,6 +13,8 @@ extensions = [
 	,".html"
 ]
 
+requires_meta = False
+
 # Define the global sitemap.
 _sitemap = [
 	"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
