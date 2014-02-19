@@ -14,6 +14,8 @@ extensions = [
 	,".xhtml"
 ]
 
+requires_meta = False
+
 # Code Start
 
 def preprocess(doc, config, args):
