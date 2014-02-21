@@ -4,6 +4,7 @@ import os.path
 import codecs
 import string
 import time
+import json
 
 # Configuration
 website_name = "The Floaternet"
@@ -82,6 +83,7 @@ def process(doc_path, meta):
         tags.append("<a href=\"" + config["baseURL"] + "\">" + tagstub + "</a>")
 
     content.append(", ".join(tags))
+    content.append("</p><br>")
 
     # Convert the input markdown into HTML ready for the middle of the template.
     with codecs.open(doc_path, mode="r", encoding="utf-8") as markdown_input:
@@ -104,18 +106,33 @@ def finalise():
 
 # Utility Functions
 
+def generate_index():
+    index_path = os.path.join(args.chosen_path, "index")
+    meta = get_meta_info(index_path)
+    content = ["<p>", meta["description"], "</p>"]
+    content.append("<h2>Check out some interesting tags:</h2>")
+    content.append("<ul>")
+    for tag_name in _tag_pages:
+        content.append("<li><a href=\"" + get_canonical(tag_name + "/index") + "\">" + tag_name + "</a></li>")
+    content.append("</ul>")
+    generate_document(index_path, meta, "\n".join(content))
+
 def generate_tag_page(tag_name, contents):
     tag_path = os.path.join(args.chosen_path, tag_name.split("/", 1)[0], "index")
     meta = get_meta_info(tag_path)
     content = ["<p>", meta["description"], "</p>"]
     subtags = collections.defaultdict(list)
+    print(contents)
     for doc in contents:
         subtags[doc["subtag"]].append(doc)
+    content.append("<h2>Pages in this Tag</h2>")
+    content.append("<ul>")
     for doc in subtags["main"]:
-        pass
+        content.append("<li><a href=\"" + doc["canonical"] + "\">" + doc["title"] + "</a></li>")
+    content.append("</ul")
     del subtags["main"]
     for subtag, documents in subtags:
-        content.append("<h2>" + subtag + "</h2>")
+        content.append("<h2 id=\"" + subtag.replace(" ", "_") + "\">" + subtag + "</h2>")
         content.append("<ul>")
         for doc in documents:
             content.append("<li><a href=\"" + doc["canonical"] + "\">" + doc["title"] + "</a></li>")
@@ -137,7 +154,7 @@ def generate_document(doc_path, meta, content):
     description = meta["description"]
     # Generate the timestamp.
     if meta["suppress_timestamp"]:
-        update_time = ""
+        update_time = " "
     else:
         update_time = time.strftime(timeFormula, time.localtime(os.path.getmtime(doc_path)))
     html_output = _template.safe_substitute(
