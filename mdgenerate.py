@@ -1,4 +1,4 @@
-import collections.defaultdict
+import collections
 import markdown
 import os.path
 import codecs
