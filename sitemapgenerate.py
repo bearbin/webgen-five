@@ -44,13 +44,13 @@ def postprocess(doc, config, args, meta):
 def finalise(config, args):
 	print("Writing sitemap!")
 	_sitemap.append("</urlset>")
-	with open(os.path.join(args.chosenPath, "sitemap.xml"), "w") as sm:
+	with open(os.path.join(args.chosen_path, "sitemap.xml"), "w") as sm:
 		sm.write("\n".join(_sitemap))
 
 # Utility Functions
 
 def get_canonical(doc, config, args):
-        relative_path = os.path.relpath(os.path.splitext(doc)[0], args.chosenPath)
+        relative_path = os.path.relpath(os.path.splitext(doc)[0], args.chosen_path)
         if os.path.basename(relative_path) == "index":
                 relative_path = os.path.dirname(relative_path) + "/"
         return config["baseURL"] + relative_path

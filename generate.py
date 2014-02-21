@@ -71,7 +71,7 @@ args = parser.parse_args()
 # Run the generators.
 
 for generator in enabled_generators:
-	documents = find_files(args.chosenPath)
+	documents = find_files(args.chosen_path)
 	generator_mappings = {}
 	for extension in generator.extensions:
 		generator_mappings[extension] = generator

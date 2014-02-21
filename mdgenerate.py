@@ -150,7 +150,7 @@ def get_subtag(tag):
 		return "main"
 
 def get_canonical(doc):
-	relative_path = os.path.relpath(os.path.splitext(doc)[0], args.chosenPath)
+	relative_path = os.path.relpath(os.path.splitext(doc)[0], args.chosen_path)
 	if os.path.basename(relative_path) == "index":
 		relative_path = os.path.dirname(relative_path) + "/"
 	if relative_path.endswith("//"):
