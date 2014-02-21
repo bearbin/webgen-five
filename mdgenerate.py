@@ -72,14 +72,23 @@ def preprocess(doc_path, meta):
 
 def process(doc_path, meta):
     print("Converting " + doc_path + " to HTML.")
+
+    # Generate a list of tags that links back to the tag index page.
+    content = ["<p><b>Tags:</b> "]
+    tags = []
+
+    for tag in meta["tags"]:
+        tagstub = tag.split("/")[0]
+        tags.append("<a href=\"" + config["baseURL"] + "\">" + tagstub + "</a>")
+
+    content.append(", ".join(tags))
+
     # Convert the input markdown into HTML ready for the middle of the template.
     with codecs.open(doc_path, mode="r", encoding="utf-8") as markdown_input:
-        markdown_generated = markdown.markdown(markdown_input.read())
-
-    # TODO: List of tags!
+        content.append(markdown.markdown(markdown_input.read()))
 
     # Do everything else to the page, and write it to disk.
-    generate_document(doc_path, meta, markdown_generated)
+    generate_document(doc_path, meta, "".join(content))
     return True
 
 def postprocess(doc_path, meta):
