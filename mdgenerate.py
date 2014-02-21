@@ -29,72 +29,87 @@ extensions = [
 
 requires_meta = True
 
+config = None
+args = None
+
 # Setup
 
 # Tag Pages List
 _tag_pages = collections.defaultdict(list)
 
+# Global Template
+_template = None
+
 # Code Start
 
-def preprocess(doc, config, args, meta):
+def initialise():
+	# Load the template from the specified template file and read it.
+	with codecs.open(args.template_path, mode="r", encoding="utf-8") as template_file:
+		_template = string.Template(template_file.read())
+
+def preprocess(doc_path, meta):
+	if not meta["generate"]:
+		return False
+	# Add the page to its relevant tag pages.
+	for tag in meta["tags"]:
+		_tag_pages[tag].append({"subtag": get_subtag(tag), "canonical": get_canonical(doc_path), "title": meta["title"]})
+	# If everything is to be generated, generate everything.
 	if args.force_generate == True:
 		return True
-	output_path = os.path.splitext(doc)[0] + ".htm"
-	if is_updated(os.path.splitext(doc)[0] + ".meta", output_path):
+	# Now check to see if it's updated. If it is, then keep it around for updating.
+	output_path = os.path.splitext(doc_path)[0] + ".htm"
+	if is_updated(os.path.splitext(doc_path)[0] + ".meta", output_path):
 		return True
 	if (not os.path.isfile(output_path)) or is_updated(args.template_path, output_path):
 		return True
-	return is_updated(doc, output_path)
+	return is_updated(doc_path, output_path)
 
-def process(doc, config, args, meta):
-	print("Converting " + doc + " to HTML.")
-	# Open the template file.
-	with codecs.open(args.template_path, mode="r", encoding="utf-8") as template_file:
-		template = string.Template(template_file.read())
-	title = meta["title"]
-	if meta["plain_title"]:
-		head_title = title
-	else:
-		head_title = title + " &middot; " + website_name
-	canonical = get_canonical(doc, config, args)
-	description = meta["description"]
-	update_time = time.strftime(timeFormula, time.localtime(os.path.getmtime(doc)))
+def process(doc_path, meta):
+	print("Converting " + doc_path + " to HTML.")
 	# Convert the input markdown into HTML ready for the middle of the template.
 	with codecs.open(doc, mode="r", encoding="utf-8") as markdown_input:
 		markdown_generated = markdown.markdown(markdown_input.read())
-	html_output = template.safe_substitute(title = title,
-	                                  head_title = head_title,
-	                                  canonical = canonical,
-	                                  description = description,
-	                                  update_time = update_time,
-	                                  markdown_generated = markdown_generated)
-	# Write the generated HTML.
-	with codecs.open(doc[:-3] + ".htm", mode="w", encoding="utf-8") as f:
-		f.write(html_output)
-	# Add the page to its relevant tag pages.
-	for tag in meta["tags"]:
-		_tag_pages[tag].append({"subtag": get_subtag(tag), "canonical": canonical, "title": title})
+	# Do everything else to the page, and write it to disk.
+	generate_document(doc_path, meta, markdown_generated)
 	return True
 
-def postprocess(doc, config, args, meta):
+def postprocess(doc_path, meta):
+	# Nothing to see here, move along...
 	pass
 
-def finalise(config, args):
+def finalise():
 	# First, generate the tag pages from the tags.
-	for tag_page in _tag_pages:
-		generate_tag_page(tag_page)
+	for tag_name, tag_page in _tag_pages:
+		generate_tag_page(tag_name, tag_page)
 	# Then, generate the main index page.
 	generate_index()
 
 # Utility Functions
 
-def generate_document(path, config, args, meta, content):
+def generate_tag_page(tag_name, contents):
+	tag_path = os.path.join(args.chosen_path, tag_name.split("/", 1)[0], "index")
+	meta = get_meta_info(tag_path)
+	content = ["<p>", meta["description"], "</p>"]
+	subtags = collections.defaultdict{list}
+	for doc in contents:
+		subtags[doc["subtag"]].append(doc)
+	for doc in subtags["main"]:
+		pass
+	del subtags["main"]
+	for subtag, documents in subtags:
+		content.append("<h2>" + subtag + "</h2>")
+		content.append("<ul>")
+		for doc in documents:
+			content.append("<li><a href=\"" + doc["canonical"] + "\">" + doc["title"] + "</a></li>")
+		content.append("")
+	# Generate the tag page.
+	generate_document(tag_path, meta, "\n".join(content))
+
+
+def generate_document(doc_path, meta, content):
 	"""
 	Generate a document with the information from the meta file, and content to go in the middle.
 	"""
-	# Open the template file.
-	with codecs.open(args.template_path, mode="r", encoding="utf-8") as template_file:
-		template = string.Template(template_file.read())
 	title = meta["title"]
 	if meta["plain_title"]:
 		head_title = title
@@ -107,7 +122,7 @@ def generate_document(path, config, args, meta, content):
 		update_time = ""
 	else:
 		update_time = time.strftime(timeFormula, time.localtime(os.path.getmtime(doc)))
-	html_output = template.safe_substitute(
+	html_output = _template.safe_substitute(
 		title = title,
 	        head_title = head_title,
 	        canonical = canonical,
@@ -116,7 +131,7 @@ def generate_document(path, config, args, meta, content):
 	        content = content
 	)
 	# Write the generated HTML.
-	with codecs.open(doc[:-3] + ".htm", mode="w", encoding="utf-8") as f:
+	with codecs.open(os.path.splitext(doc)[0] + ".htm", mode="w", encoding="utf-8") as f:
 		f.write(html_output)
 
 def get_meta_info(doc):
@@ -132,9 +147,9 @@ def get_subtag(tag):
 	try:
 		return tag.split("/", 1)[1]
 	except IndexError:
-		return False
+		return "main"
 
-def get_canonical(doc, config, args):
+def get_canonical(doc):
 	relative_path = os.path.relpath(os.path.splitext(doc)[0], args.chosenPath)
 	if os.path.basename(relative_path) == "index":
 		relative_path = os.path.dirname(relative_path) + "/"

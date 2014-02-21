@@ -62,7 +62,7 @@ def get_meta(doc):
 parser = argparse.ArgumentParser(description="Generate a static website from markdown files.")
 parser.add_argument("--force", dest="force_generate", action="store_true",
                     help="force generation of site content.")
-parser.add_argument("--path", dest="chosenPath", help="choose a path to operate on (default '.')", default=".")
+parser.add_argument("--path", dest="chosen_path", help="choose a path to operate on (default '.')", default=".")
 for generator in enabled_generators:
 	for arg in generator.arguments:
 		parser.add_argument(arg["name"], dest=arg["dest"], action=arg["method"], help=arg["help"], default=arg["default"])
