@@ -90,7 +90,7 @@ def generate_tag_page(tag_name, contents):
 	tag_path = os.path.join(args.chosen_path, tag_name.split("/", 1)[0], "index")
 	meta = get_meta_info(tag_path)
 	content = ["<p>", meta["description"], "</p>"]
-	subtags = collections.defaultdict{list}
+	subtags = collections.defaultdict(list)
 	for doc in contents:
 		subtags[doc["subtag"]].append(doc)
 	for doc in subtags["main"]:
