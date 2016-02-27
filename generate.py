@@ -3,88 +3,93 @@
 # Imports
 
 import argparse
+import codecs
+from functions import find_files
+import markdown
 import os.path
 
 # Generators
-import mdgenerate
+
+import contentpages
 import gzcompress
 import sitemapgenerate
-
-# Configuration
-
-enabled_generators = [
-	mdgenerate
-	,sitemapgenerate
-	,gzcompress
-]
+import tagpages
 
 configuration = {
 	# The base URL for the website to be generated.
-	"baseURL":      "http://floaternet.com/"
+	"base_url": "http://floaternet.com/"
+	,"website_name": "The Floaternet"
 }
 
-# Functions
-
-def findFiles(startPath, types=None):
+def extract_wg5(file_path):
 	"""
-	Search for files of the type recursively from, starting from `startPath`.
+	Extract wg5 data from a file.
 
 	Arguments:
-	startPath - where to start the search for files (string)
-	types - what file extensions to search for (tuple)
+	file_path - the path to the file from which data is to be extracted
 
-	Returns a list of relative paths to matched files. (empty list if none found)
+	Returns a dictionary containing:
+
+	content - the markdown-converted contents of the file
+	metadata - metadata from the file
+	mod_time - time of last modification
 	"""
-	files = []
-	for node in os.listdir(startPath):
-		nodePath = os.path.join(startPath, node)
-		if os.path.isdir(nodePath):
-			files = files + findFiles(nodePath, types)
-		else:
-			if types == None:
-				files.append(nodePath)
-			elif node.endswith(types):
-				files.append(nodePath)
-	return files
+	data = {}
+	data["mod_time"] = os.path.getmtime(file_path)
+	with codecs.open(file_path, mode="r", encoding="utf-8") as f:
+		md = markdown.Markdown(extensions = ['markdown.extensions.meta'])
+		data["content"] = md.convert(f.read())
+		data["metadata"] = md.Meta
+	return data
 
 # Register the command line options.
 
-parser = argparse.ArgumentParser(description="Generate a static website from markdown files.")
-parser.add_argument("--force", dest="force_generate", action="store_true",
-                    help="force generation of site content.")
-parser.add_argument("--path", dest="chosenPath", help="choose a path to operate on (default '.')", default=".")
-for generator in enabled_generators:
+parser = argparse.ArgumentParser(description="webgen-five static site generator.")
+parser.add_argument("--input", dest="input_path", help="choose a path to operate on (default '.')", default=".")
+parser.add_argument("--output", dest="output_path", help="choose a path for output to be stored in (default './out')", default="./out")
+for generator in (contentpages,gzcompress,tagpages,sitemapgenerate):
 	for arg in generator.arguments:
 		parser.add_argument(arg["name"], dest=arg["dest"], action=arg["method"], help=arg["help"], default=arg["default"])
 args = parser.parse_args()
 
-# Run the generators.
+# Find documents to operate on in input directory.
 
-for generator in enabled_generators:
-	documents = findFiles(args.chosenPath)
-	generator_mappings = {}
-	for extension in generator.extensions:
-		generator_mappings[extension] = generator
+documents = find_files(args.input_path, (".wg5",))
 
-	# Preprocess
-	for doc in documents[:]:
-		try:
-			keep = generator_mappings[os.path.splitext(doc)[1]].preprocess(doc, configuration, args)
-		except KeyError:
-			documents.remove(doc)
-			continue
-		if not keep:
-			documents.remove(doc)
-	
-	# Main Processing
-	for doc in documents[:]:
-		keep = generator_mappings[os.path.splitext(doc)[1]].process(doc, configuration, args)
-		if not keep:
-			documents.remove(doc) 
+# Extract metadata and build list of documents.
 
-	# Postprocessing
-	for doc in documents:
-		generator_mappings[os.path.splitext(doc)[1]].preprocess(doc, configuration, args)
+md_documents = [dict({"path": doc}.items() + extract_wg5(doc).items()) for doc in documents]
 
-	# Finalisation.
-	generator.finalise(configuration, args)
+# Build content pages.
+
+for document in md_documents:
+	contentpages.generate(document, configuration, args)
+
+# Build tag index.
+
+tags = {}
+for document in md_documents:
+	for tag in document["metadata"]["tags"]:
+		tags.setdefault(tag, []).append(document)
+
+# Build tag pages.
+
+for key in tags:
+	tagpages.generate(key, tags[key], configuration, args)
+
+# Generate sitemap.
+
+sitemapgenerate.generate(configuration, args)
+
+# gzip compress documents.
+
+documents = find_files(args.output_path, (
+	".css"
+	,".htm"
+	,".html"
+	,".js"
+	,".xml"
+	,".xhtml"
+	))
+for document in documents:
+	gzcompress.generate(document)

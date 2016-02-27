@@ -1,54 +1,31 @@
 import os.path
 import time
+from functions import find_files
 
 # Configuration
-_change_frequency = "daily"
+_change_frequency = "weekly"
 
-# Code Start
-
+# Sitemaps need no arguments.
 arguments = []
 
-extensions = [
-	".htm"
-	,".html"
-]
-
-# Define the global sitemap.
-_sitemap = [
-	"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-	,"<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">"
-]
-
-def preprocess(doc, config, args):
-	return True
-
-def process(doc, config, args):
-	# Get the canonical URL for the file.
-	canonical_url = get_canonical(doc, config, args)
-	# Get file modification time.
-	modification_time = os.path.getmtime(doc)
-	formatted_time = time.strftime("%Y-%m-%d", time.localtime(modification_time))
-	# Squidge the data onto the array.
-	_sitemap.append("  <url>")
-	_sitemap.append("    <loc>" + canonical_url + "</loc>")
-	_sitemap.append("    <lastmod>" + formatted_time + "</lastmod>")
-	_sitemap.append("    <changefreq>" + _change_frequency + "</changefreq>")
-	_sitemap.append("  </url>")
-	return True
-
-def postprocess(doc, config, args):
-	pass
-
-def finalise(config, args):
+def generate(config, args):
+	# Find files to be included in the sitemap.
+	files = find_files(args.output_path, (".htm", ".html"))
+	sitemap = [
+		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+		,"<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">"
+	]
+	for file in files:
+		canonical_url = config["base_url"] + os.path.relpath(file, os.path.splitext(args.output_path)[0])
+		# Get file modification time.
+		formatted_time = time.strftime("%Y-%m-%d", time.localtime(os.path.getmtime(file)))
+		# Squidge the data onto the array.
+		sitemap.append("  <url>")
+		sitemap.append("    <loc>" + canonical_url + "</loc>")
+		sitemap.append("    <lastmod>" + formatted_time + "</lastmod>")
+		sitemap.append("    <changefreq>" + _change_frequency + "</changefreq>")
+		sitemap.append("  </url>")
+	sitemap.append("</urlset>")
 	print("Writing sitemap!")
-	_sitemap.append("</urlset>")
-	with open(os.path.join(args.chosenPath, "sitemap.xml"), "w") as sm:
-		sm.write("\n".join(_sitemap))
-
-# Utility Functions
-
-def get_canonical(doc, config, args):
-        relative_path = os.path.relpath(os.path.splitext(doc)[0], args.chosenPath)
-        if os.path.basename(relative_path) == "index":
-                relative_path = os.path.dirname(relative_path) + "/"
-        return config["baseURL"] + relative_path
+	with open(os.path.join(args.output_path, "sitemap.xml"), "w") as sm:
+		sm.write("\n".join(sitemap))
