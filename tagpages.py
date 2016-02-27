@@ -14,6 +14,9 @@ time_formula = "%d %B %Y"
 arguments = []
 
 def generate(tag, pages, config, args):
+	# Do not create a listing if there are no tags.
+	if tag == "":
+		return
 	out_file = os.path.join(args.output_path, "tag", tag) + ".htm"
 	print("writing " + out_file)
 	with codecs.open(args.template_path, mode="r", encoding="utf-8") as template_file:
