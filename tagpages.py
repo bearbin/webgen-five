@@ -23,7 +23,7 @@ def generate(tag, pages, config, args):
 		template = string.Template(template_file.read())
 	tag_html = ["<ul>"]
 	for page in pages:
-		tag_html.append("<li><a href=\"/" + get_canonical(page, config) + "\">" + page["metadata"]["title"][0] + "</a></li>")
+		tag_html.append("<li><a href=\"" + get_canonical(page, config) + "\">" + page["metadata"]["title"][0] + "</a></li>")
 	tag_html.append("</ul>")
 	mod_times = [page["mod_time"] for page in pages]
 	html_output = template.substitute(
