@@ -16,7 +16,7 @@ def generate(config, args):
 		,"<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">"
 	]
 	for file in files:
-		canonical_url = config["base_url"] + os.path.relpath(file, os.path.splitext(args.output_path)[0])
+		canonical_url = config["base_url"] + os.path.relpath(os.path.splitext(file)[0], args.output_path)
 		# Get file modification time.
 		formatted_time = time.strftime("%Y-%m-%d", time.localtime(os.path.getmtime(file)))
 		# Squidge the data onto the array.
