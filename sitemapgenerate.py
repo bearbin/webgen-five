@@ -15,10 +15,10 @@ def generate(config, args):
 		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 		,"<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">"
 	]
-	for file in files:
-		canonical_url = config["base_url"] + os.path.relpath(os.path.splitext(file)[0], args.output_path)
+	for doc in files:
+		canonical_url = canonical_url(doc, config, args)
 		# Get file modification time.
-		formatted_time = time.strftime("%Y-%m-%d", time.localtime(os.path.getmtime(file)))
+		formatted_time = time.strftime("%Y-%m-%d", time.localtime(os.path.getmtime(doc)))
 		# Squidge the data onto the array.
 		sitemap.append("  <url>")
 		sitemap.append("    <loc>" + canonical_url + "</loc>")
@@ -29,3 +29,10 @@ def generate(config, args):
 	print("Writing sitemap!")
 	with open(os.path.join(args.output_path, "sitemap.xml"), "w") as sm:
 		sm.write("\n".join(sitemap))
+
+def canonical_url(path, config, args):
+	rel_path = os.path.relpath(os.path.splitext(path)[0], args.output_path)
+	if rel_path == "index":
+		return config["base_url"]
+	else:
+		return config["base_url"] + rel_path
