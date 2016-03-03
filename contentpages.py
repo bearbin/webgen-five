@@ -44,7 +44,7 @@ def get_tags(doc):
 	if get_basename(doc) == "index":
 		return ""
 	tags = ["<p>Tagged as: "]
-	for tag in doc["metadata"]["tags"]:
+	for tag in sorted(doc["metadata"]["tags"]):
 		tags.append("<a href=\"/tag/" + tag + "\">" + tag + "</a>")
 	tags.append("</p>")
 	return "\n".join(tags)

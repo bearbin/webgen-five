@@ -17,7 +17,7 @@ import tagpages
 
 configuration = {
 	# The base URL for the website to be generated.
-	"base_url": "http://floaternet.com/"
+	"base_url": "https://floaternet.com/"
 	,"website_name": "The Floaternet"
 }
 
