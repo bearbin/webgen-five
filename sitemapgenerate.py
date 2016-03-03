@@ -16,7 +16,7 @@ def generate(config, args):
 		,"<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">"
 	]
 	for doc in files:
-		canonical_url = canonical_url(doc, config, args)
+		canonical_url = get_canonical(doc, config, args)
 		# Get file modification time.
 		formatted_time = time.strftime("%Y-%m-%d", time.localtime(os.path.getmtime(doc)))
 		# Squidge the data onto the array.
@@ -30,7 +30,7 @@ def generate(config, args):
 	with open(os.path.join(args.output_path, "sitemap.xml"), "w") as sm:
 		sm.write("\n".join(sitemap))
 
-def canonical_url(path, config, args):
+def get_canonical(path, config, args):
 	rel_path = os.path.relpath(os.path.splitext(path)[0], args.output_path)
 	if rel_path == "index":
 		return config["base_url"]
