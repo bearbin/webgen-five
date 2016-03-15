@@ -25,7 +25,11 @@ def generate(doc, config, args):
 	print("writing " + out_file)
 	with codecs.open(args.template_path, mode="r", encoding="utf-8") as template_file:
 		template = string.Template(template_file.read())
+	ad_code = ""
+	if doc["metadata"]["ads"][0] == "yes":
+		ad_code = config["ad_code"]
 	html_output = template.substitute(
+		ad_code = ad_code
 		canonical = get_canonical(doc, config),
 		description = doc["metadata"]["description"][0],
 		head_title = doc["metadata"]["title"][0] + " &middot; " + config["website_name"],
