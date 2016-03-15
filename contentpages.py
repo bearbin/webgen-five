@@ -29,7 +29,7 @@ def generate(doc, config, args):
 	if doc["metadata"]["ads"][0] == "yes":
 		ad_code = config["ad_code"]
 	html_output = template.substitute(
-		ad_code = ad_code
+		ad_code = ad_code,
 		canonical = get_canonical(doc, config),
 		description = doc["metadata"]["description"][0],
 		head_title = doc["metadata"]["title"][0] + " &middot; " + config["website_name"],

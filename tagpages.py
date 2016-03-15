@@ -27,7 +27,7 @@ def generate(tag, pages, config, args):
 	tag_html.append("</ul>")
 	mod_times = [page["mod_time"] for page in pages]
 	html_output = template.substitute(
-		ad_code = ""
+		ad_code = "",
 		canonical = config["base_url"] + "tag/" + tag,
 		description = "A list of all pages tagged with " + tag,
 		head_title = tag + " &middot; " + config["website_name"],
