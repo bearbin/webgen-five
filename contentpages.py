@@ -41,7 +41,7 @@ def generate(doc, config, args):
 # Utility Functions
 
 def get_tags(doc):
-	if get_basename(doc) == "index":
+	if (doc["metadata"]["tags"] == ['']) or (get_basename(doc) == "index"):
 		return ""
 	tags = ["<p>Tagged as: "]
 	for tag in sorted(doc["metadata"]["tags"]):
