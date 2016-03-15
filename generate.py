@@ -18,7 +18,10 @@ import tagpages
 configuration = {
 	# The base URL for the website to be generated.
 	"base_url": "https://floaternet.com/"
+	# The website name
 	,"website_name": "The Floaternet"
+	# The advert code
+	,"ad_code": "ADD_YOUR_AD_CODE_HERE"
 }
 
 def extract_wg5(file_path):
@@ -80,16 +83,3 @@ for key in tags:
 # Generate sitemap.
 
 sitemapgenerate.generate(configuration, args)
-
-# gzip compress documents.
-
-documents = find_files(args.output_path, (
-	".css"
-	,".htm"
-	,".html"
-	,".js"
-	,".xml"
-	,".xhtml"
-	))
-for document in documents:
-	gzcompress.generate(document)
