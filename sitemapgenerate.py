@@ -26,7 +26,7 @@ def generate(config, args):
 		sitemap.append("    <changefreq>" + _change_frequency + "</changefreq>")
 		sitemap.append("  </url>")
 	sitemap.append("</urlset>")
-	print("Writing sitemap!")
+	print("writing sitemap!")
 	with open(os.path.join(args.output_path, "sitemap.xml"), "w") as sm:
 		sm.write("\n".join(sitemap))
 
