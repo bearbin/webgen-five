@@ -14,10 +14,6 @@ import contentpages
 import sitemapgenerate
 import tagpages
 
-# Configuration
-
-import wgconfig
-
 def extract_wg5(file_path):
 	"""
 	Extract wg5 data from a file.
@@ -42,12 +38,16 @@ def extract_wg5(file_path):
 # Register the command line options.
 
 parser = argparse.ArgumentParser(description="webgen-five static site generator.")
-parser.add_argument("--input", dest="input_path", help="choose a path to operate on (default '.')", default=".")
-parser.add_argument("--output", dest="output_path", help="choose a path for output to be stored in (default './out')", default="./out")
+parser.add_argument("--input", dest="input_path", help="path to operate on (default '.')", default=".")
+parser.add_argument("--output", dest="output_path", help="path for output to be stored in (default './out')", default="./out")
+parser.add_argument("--config-path", dest="config_path", help="path for config information (default ''./wgconfig.py')", default="./wgconfig.py")
 for generator in (contentpages,tagpages,sitemapgenerate):
 	for arg in generator.arguments:
 		parser.add_argument(arg["name"], dest=arg["dest"], action=arg["method"], help=arg["help"], default=arg["default"])
 args = parser.parse_args()
+
+# Parse the configuration
+execfile(args.config_path)
 
 # Find documents to operate on in input directory.
 
