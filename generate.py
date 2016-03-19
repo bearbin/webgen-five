@@ -14,14 +14,9 @@ import contentpages
 import sitemapgenerate
 import tagpages
 
-configuration = {
-	# The base URL for the website to be generated.
-	"base_url": "https://floaternet.com/"
-	# The website name
-	,"website_name": "The Floaternet"
-	# The advert code
-	,"ad_code": "ADD_YOUR_AD_CODE_HERE"
-}
+# Configuration
+
+import wgconfig
 
 def extract_wg5(file_path):
 	"""
