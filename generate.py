@@ -47,7 +47,10 @@ for generator in (contentpages,tagpages,sitemapgenerate):
 args = parser.parse_args()
 
 # Parse the configuration
-execfile(args.config_path)
+
+with open(args.config_path) as f:
+    code = compile(f.read(), args.config_path, 'exec')
+    exec(code)
 
 # Find documents to operate on in input directory.
 
