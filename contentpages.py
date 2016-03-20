@@ -47,8 +47,7 @@ def generate(doc, config, args):
 def get_tags(doc):
 	if (doc["metadata"]["tags"] == ['']) or (get_basename(doc) == "index"):
 		return ""
-	tags = ["<p>Tagged as: "]
+	tags = ["Tagged as: "]
 	for tag in sorted(doc["metadata"]["tags"]):
 		tags.append("<a href=\"/tag/" + tag + "\">" + tag + "</a>")
-	tags.append("</p>")
 	return "\n".join(tags)
