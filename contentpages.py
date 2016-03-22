@@ -32,7 +32,7 @@ def generate(doc, config, args):
 		"description": doc["metadata"]["description"][0],
 		"content": doc["content"],
 		"tags": get_tags(doc),
-		"tags_enabled": (get_tags(doc) != []),
+		"meta_enabled": (get_tags(doc) != []),
 		"title": doc["metadata"]["title"][0],
 		"update_time": time.strftime(time_formula, time.localtime(doc["mod_time"])),
 		"website_name": config["website_name"]
