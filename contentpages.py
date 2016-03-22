@@ -26,7 +26,7 @@ def generate(doc, config, args):
 	print("writing " + out_file)
 	with codecs.open(args.template_path, mode="r", encoding="utf-8") as template_file:
 		template = template_file.read()
-	html_output = template.render(template, {
+	html_output = pystache.render(template, {
 		"ads_enabled": (doc["metadata"]["ads"][0].lower() in ("yes", "true", "t", "1")),
 		"canonical": get_canonical(doc, config),
 		"description": doc["metadata"]["description"][0],
