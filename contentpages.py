@@ -1,6 +1,7 @@
+import codecs
 import markdown
 import os.path
-import codecs
+import pystache
 import string
 import time
 from functions import get_canonical, get_basename
@@ -24,20 +25,17 @@ def generate(doc, config, args):
 	out_file = os.path.join(args.output_path, get_basename(doc)) + ".htm"
 	print("writing " + out_file)
 	with codecs.open(args.template_path, mode="r", encoding="utf-8") as template_file:
-		template = string.Template(template_file.read())
-	ad_code = ""
-	if doc["metadata"]["ads"][0] == "yes":
-		ad_code = config["ad_code"]
-	html_output = template.substitute(
-		ad_code = ad_code,
-		canonical = get_canonical(doc, config),
-		description = doc["metadata"]["description"][0],
-		head_title = doc["metadata"]["title"][0] + " &middot; " + config["website_name"],
-		html_content = doc["content"],
-		tags = get_tags(doc),
-		title = doc["metadata"]["title"][0],
-		update_time = time.strftime(time_formula, time.localtime(doc["mod_time"]))
-	)
+		template = template_file.read()
+	html_output = template.render(template, {
+		"ads_enabled": (doc["metadata"]["ads"][0].lower() in ("yes", "true", "t", "1")),
+		"canonical": get_canonical(doc, config),
+		"description": doc["metadata"]["description"][0],
+		"content": doc["content"],
+		"tags": get_tags(doc),
+		"title": doc["metadata"]["title"][0],
+		"update_time": time.strftime(time_formula, time.localtime(doc["mod_time"])),
+		"website_name": config["website_name"]
+	})
 	with codecs.open(out_file, mode="w", encoding="utf-8") as f:
 		f.write(html_output)
 	return True
@@ -47,7 +45,4 @@ def generate(doc, config, args):
 def get_tags(doc):
 	if (doc["metadata"]["tags"] == ['']) or (get_basename(doc) == "index"):
 		return ""
-	tags = ["Tagged as: "]
-	for tag in sorted(doc["metadata"]["tags"]):
-		tags.append("<a href=\"/tag/" + tag + "\">" + tag + "</a>")
-	return "\n".join(tags)
+	return sorted(doc["metadata"]["tags"])
