@@ -2,7 +2,6 @@ import codecs
 import markdown
 import os.path
 import pystache
-import string
 import time
 from functions import get_canonical, get_basename
 
