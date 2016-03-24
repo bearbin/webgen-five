@@ -27,12 +27,12 @@ def generate(tag, pages, config, args):
 	with codecs.open(args.template_path, mode="r", encoding="utf-8") as template_file:
 		template = template_file.read()
 	html_output = pystache.render(template, {
-		"ads_enabled": false,
+		"ads_enabled": False,
 		"canonical": config["base_url"] + "tag/" + tag,
 		"description": "A list of all pages on " + config["website_name"] + " tagged with " + tag,
 		"content": "\n".join(tag_html),
 		"tags": [],
-		"meta_enabled": false,
+		"meta_enabled": False,
 		"title": "Pages tagged with " + tag,
 		"update_time": time.strftime(time_formula, time.localtime(max(mod_times))),
 		"website_name": config["website_name"],
