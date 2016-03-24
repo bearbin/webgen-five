@@ -34,7 +34,7 @@ def generate(tag, pages, config, args):
 		"tags": [],
 		"meta_enabled": false,
 		"title": "Pages tagged with " + tag,
-		"update_time": time.strftime(time_formula, time.localtime(max(mod_times)))
-		"website_name": config["website_name"]
+		"update_time": time.strftime(time_formula, time.localtime(max(mod_times))),
+		"website_name": config["website_name"],
 	})
 	return True
