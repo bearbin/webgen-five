@@ -37,4 +37,6 @@ def generate(tag, pages, config, args):
 		"update_time": time.strftime(time_formula, time.localtime(max(mod_times))),
 		"website_name": config["website_name"],
 	})
+	with codecs.open(out_file, mode="w", encoding="utf-8") as f:
+		f.write(html_output)
 	return True
